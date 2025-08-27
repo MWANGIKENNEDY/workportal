@@ -1,19 +1,15 @@
 import JobFetchWrapper from "@/components/job/jobFetchWrapper";
 import JobSearchCard from "@/components/job/jobFilter";
-import JobList from "@/components/job/jobList";
-import JobsNotFound from "@/components/job/jobsNotFound";
-import Paginate from "@/components/paginate";
-import { getAllJobs } from "@/lib/db/query";
-import { JobArrayWithRelations } from "@/lib/types";
+
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function Home({
   searchParams,
-  params,
+  // params,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-  params: Promise<Record<string, string | string[] | undefined>>;
+  // params: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { page, limit, query, type, location } = await searchParams;
 

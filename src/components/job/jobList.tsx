@@ -1,7 +1,7 @@
 import { JobArrayWithRelations } from "@/lib/types";
 import Link from "next/link";
-import React, { Suspense } from "react";
-import Paginate from "../paginate";
+import React from "react";
+
 
 
 const JobListContent = ({ jobs }: { jobs: JobArrayWithRelations }) => {

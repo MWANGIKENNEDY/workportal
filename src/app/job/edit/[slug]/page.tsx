@@ -15,7 +15,7 @@ const JobEditPage = async ({
 
   const job: JobWithRelations | null = await getOneJob(slug);
 
-  const { userId } = await auth();
+
 
   if (!job) {
     return notFound();
