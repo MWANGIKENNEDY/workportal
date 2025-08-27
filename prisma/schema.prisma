@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid()) // Primary key for the User table, generated locally as a cuid (Collision-resistant ID)
+  clerkId   String   @unique              // Unique ID assigned by Clerk authentication service
+  email     String   @unique              // User's email address, must be unique
+  firstName String?                       // Optional first name
+  lastName  String?                       // Optional last name
+  imageUrl  String?                       // Optional profile image URL
+  provider  String?                       // Optional field indicating authentication provider (e.g., "google", "github")
+  metadata  Json?                          // Optional JSON field for storing extra, custom user data
+  createdAt DateTime @default(now())       // Timestamp of when the user was created (defaults to current time)
+  updatedAt DateTime @updatedAt            // Timestamp auto-updated whenever the record is modified
+  
+  // Relations
+  jobs Job[] @relation("PostedJobs")       // One-to-many relationship: a user can post many jobs
+  applications Application[]               // One-to-many relationship: a user can apply to many jobs
+}
+
+model Job {
+  id String @id @default(cuid())           // Primary key for the Job table, generated locally as a cuid
+  title String                             // Job title
+  company String                           // Company name
+  location String                          // Job location
+  type String                              // Job type (e.g., full-time, part-time, remote)
+  description String @db.Text              // Detailed job description (stored as TEXT type in DB for long content)
+  salary String?                           // Optional salary field
+  postedAt DateTime @default(now())        // Date and time the job was posted
+  
+  // Relations
+  postedBy User @relation("PostedJobs", fields: [postedById], references: [clerkId]) 
+  // Many-to-one relationship: this job is posted by one user
+  // Uses `postedById` as foreign key, which references `User.clerkId` (not the local DB `id`)
+
+  postedById String                        // Foreign key storing the clerkId of the posting user
+  applications Application[]               // One-to-many relationship: a job can have many applications
+}
+
+model Application {
+  id String @id @default(cuid())           // Primary key for the Application table
+  jobId String                             // Foreign key linking to Job.id
+  userId String                            // Foreign key linking to User.clerkId
+  status String @default("PENDING")        // Application status: PENDING, REVIEWING, ACCEPTED, REJECTED
+  appliedAt DateTime @default(now())       // Timestamp when the application was submitted
+
+  // Relations
+  user User @relation(fields: [userId], references: [clerkId]) 
+  // Many-to-one: each application belongs to one user, matched via Clerk ID
+
+  job Job @relation(fields: [jobId], references: [id]) 
+  // Many-to-one: each application belongs to one job
+}
